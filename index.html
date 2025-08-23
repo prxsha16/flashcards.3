@@ -2,38 +2,144 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Flashcards</title>
+  <title>Flashcards App</title>
   <link rel="stylesheet" href="flashcards.css">
 </head>
 <body>
-  <h1>Flashcard Creator & Quiz</h1>
+  <h1>Flashcards App</h1>
 
-  <!-- Add Flashcards -->
+  <!-- Flashcard Creator -->
   <div id="creator">
-    <h2>Add a Flashcard</h2>
-    <input type="text" id="newQuestion" placeholder="Enter question">
-    <input type="text" id="newAnswer" placeholder="Enter answer">
-    <button onclick="addFlashcard()">Add Flashcard</button>
-    <button onclick="clearFlashcards()">Clear All Flashcards</button>
-    <p id="status"></p>
-
-    <h3>Saved Flashcards</h3>
+    <input type="text" id="questionInput" placeholder="Enter question">
+    <input type="text" id="answerInput" placeholder="Enter answer">
+    <button id="addFlashcardBtn">Add Flashcard</button>
+    
     <ul id="flashcardList"></ul>
   </div>
 
-  <!-- Start Quiz -->
+  <!-- Flashcard Quiz -->
   <div id="quiz">
-    <h2>Quiz</h2>
-    <button onclick="startQuiz()">Start Quiz</button>
-    <div id="flashcardArea" style="display:none;">
-      <p id="question"></p>
-      <input type="text" id="answer" placeholder="Type your answer">
-      <button onclick="checkAnswer()">Submit</button>
-      <p id="feedback"></p>
+    <div id="progress" style="margin: 10px 0;">Question 1 / 1 | Score: 0</div>
+
+    <div id="flashcardArea">
+      <div id="flashcard"></div>
+      <input type="text" id="userAnswerInput" placeholder="Type your answer here">
+      <button id="submitAnswerBtn">Submit Answer</button>
+      <div id="feedback" style="margin-top:10px;"></div>
+      <button id="nextBtn">Next</button>
     </div>
   </div>
 
-  <script src="flashcards.js"></script>
+  <script>
+    // ===== Shared Flashcards =====
+    let flashcards = JSON.parse(localStorage.getItem('flashcards')) || [];
+
+    // ===== Creator Section =====
+    const questionInput = document.getElementById('questionInput');
+    const answerInput = document.getElementById('answerInput');
+    const addBtn = document.getElementById('addFlashcardBtn');
+    const flashcardList = document.getElementById('flashcardList');
+
+    function renderList() {
+      flashcardList.innerHTML = '';
+      flashcards.forEach((fc, index) => {
+        const li = document.createElement('li');
+        li.textContent = `${fc.question} → ${fc.answer}`;
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.onclick = () => {
+          flashcards.splice(index, 1);
+          localStorage.setItem('flashcards', JSON.stringify(flashcards));
+          renderList();
+        };
+        li.appendChild(deleteBtn);
+        flashcardList.appendChild(li);
+      });
+    }
+
+    addBtn.addEventListener('click', () => {
+      const q = questionInput.value.trim();
+      const a = answerInput.value.trim();
+      if (!q || !a) return;
+      flashcards.push({ question: q, answer: a });
+      localStorage.setItem('flashcards', JSON.stringify(flashcards));
+      questionInput.value = '';
+      answerInput.value = '';
+      renderList();
+      shuffleFlashcards(); // reshuffle quiz if new flashcards added
+      displayFlashcard();
+    });
+
+    renderList();
+
+    // ===== Quiz Section =====
+    const flashcardDiv = document.getElementById('flashcard');
+    const progressDiv = document.getElementById('progress');
+    const userAnswerInput = document.getElementById('userAnswerInput');
+    const submitAnswerBtn = document.getElementById('submitAnswerBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const feedbackDiv = document.getElementById('feedback');
+
+    let currentIndex = 0;
+    let score = 0;
+
+    function shuffleFlashcards() {
+      for (let i = flashcards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [flashcards[i], flashcards[j]] = [flashcards[j], flashcards[i]];
+      }
+    }
+
+    function updateProgress() {
+      progressDiv.textContent = `Question ${currentIndex + 1} / ${flashcards.length} | Score: ${score}`;
+    }
+
+    function displayFlashcard() {
+      if (flashcards.length === 0) {
+        flashcardDiv.textContent = 'No flashcards yet!';
+        userAnswerInput.style.display = 'none';
+        submitAnswerBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
+        progressDiv.textContent = '';
+        feedbackDiv.textContent = '';
+        return;
+      }
+      flashcardDiv.textContent = flashcards[currentIndex].question;
+      userAnswerInput.value = '';
+      feedbackDiv.textContent = '';
+      userAnswerInput.style.display = 'inline-block';
+      submitAnswerBtn.style.display = 'inline-block';
+      nextBtn.style.display = 'inline-block';
+      updateProgress();
+    }
+
+    submitAnswerBtn.addEventListener('click', () => {
+      const userAnswer = userAnswerInput.value.trim().toLowerCase();
+      const correctAnswer = flashcards[currentIndex].answer.trim().toLowerCase();
+      if (userAnswer === correctAnswer) {
+        feedbackDiv.textContent = '✅ Correct!';
+        score++;
+      } else {
+        feedbackDiv.textContent = `❌ Wrong! Correct answer: ${flashcards[currentIndex].answer}`;
+      }
+      updateProgress();
+    });
+
+    nextBtn.addEventListener('click', () => {
+      currentIndex++;
+      if (currentIndex >= flashcards.length) {
+        alert(`Quiz finished! Your score: ${score} / ${flashcards.length}`);
+        currentIndex = 0;
+        score = 0;
+        shuffleFlashcards();
+      }
+      displayFlashcard();
+    });
+
+    // Initial setup
+    shuffleFlashcards();
+    displayFlashcard();
+  </script>
 </body>
 </html>
