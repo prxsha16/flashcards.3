@@ -1,0 +1,103 @@
+/* Basic page styling */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
+  background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+  margin: 0;
+  padding: 50px;
+}
+
+/* Page header */
+h1 {
+  color: #333;
+  margin-bottom: 40px;
+}
+
+/* Containers */
+#creator, #quiz {
+  border-radius: 15px;
+  padding: 25px 20px;
+  margin: 20px auto;
+  width: 350px;
+  background: #fff;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  transition: transform 0.2s;
+}
+
+#creator:hover, #quiz:hover {
+  transform: translateY(-3px);
+}
+
+/* Inputs */
+input[type="text"] {
+  display: block;
+  width: 90%;
+  padding: 10px;
+  margin: 10px auto;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+/* Buttons */
+button {
+  padding: 10px 20px;
+  margin: 8px 5px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  background-color: #4CAF50;
+  color: white;
+  transition: background 0.2s, transform 0.2s;
+}
+
+button:hover {
+  background-color: #45a049;
+  transform: translateY(-2px);
+}
+
+/* Feedback messages */
+#feedback {
+  font-weight: bold;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+/* Flashcard list */
+ul {
+  list-style-type: none;
+  padding-left: 0;
+  margin-top: 15px;
+  text-align: left;
+}
+
+li {
+  padding: 6px 10px;
+  border-bottom: 1px solid #eee;
+  font-size: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Individual delete button inside list */
+.delete-btn {
+  background-color: #f44336;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.delete-btn:hover {
+  background-color: #d32f2f;
+}
+
+/* Quiz flashcard area */
+#flashcardArea {
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: 12px;
+  background: #e3f2fd;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+}
