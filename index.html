@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Flashcards</title>
+  <link rel="stylesheet" href="flashcards.css">
+</head>
+<body>
+  <h1>Flashcard Creator & Quiz</h1>
+
+  <!-- Add Flashcards -->
+  <div id="creator">
+    <h2>Add a Flashcard</h2>
+    <input type="text" id="newQuestion" placeholder="Enter question">
+    <input type="text" id="newAnswer" placeholder="Enter answer">
+    <button onclick="addFlashcard()">Add Flashcard</button>
+    <button onclick="clearFlashcards()">Clear All Flashcards</button>
+    <p id="status"></p>
+
+    <h3>Saved Flashcards</h3>
+    <ul id="flashcardList"></ul>
+  </div>
+
+  <!-- Start Quiz -->
+  <div id="quiz">
+    <h2>Quiz</h2>
+    <button onclick="startQuiz()">Start Quiz</button>
+    <div id="flashcardArea" style="display:none;">
+      <p id="question"></p>
+      <input type="text" id="answer" placeholder="Type your answer">
+      <button onclick="checkAnswer()">Submit</button>
+      <p id="feedback"></p>
+    </div>
+  </div>
+
+  <script src="flashcards.js"></script>
+</body>
+</html>
