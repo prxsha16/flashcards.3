@@ -95,7 +95,7 @@ li {
 
 #flashcardArea {
   margin-top: 30px;
-  padding: 40px;
+  padding: 110px;
   border-radius: 20px;
   background-color: #330000;
   box-shadow: 0 10px 30px rgba(255,0,0,0.4);
@@ -106,6 +106,7 @@ li {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
 }
 
 #userAnswerInput {
@@ -124,3 +125,24 @@ li {
   margin-top: 20px;
   font-weight: bold;
 }
+
+#questionInput,
+#answerInput,
+#userAnswerInput {
+  width: 1600px;   /* adjust this value as you like */
+  padding: 30px;   /* keeps it comfy */
+  font-size: 1.2em; /* makes text inside a bit bigger */
+}
+
+#quiz {
+  display: none;              /* hidden until quiz starts */
+  flex-direction: column;     /* stack items vertically */
+  justify-content: center;    /* center vertically */
+  align-items: center;        /* center horizontally */
+  min-height: 70vh;           /* take up most of the screen height */
+  margin-top: 20px;           /* optional spacing from top */
+}
+
+
+
+
