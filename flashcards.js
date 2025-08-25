@@ -1,100 +1,158 @@
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-}
+// ========== State ==========
+let flashcards = JSON.parse(localStorage.getItem("flashcards") || "[]");
+let currentCard = null;
 
+// ========== Elements (robust to naming) ==========
+const qInput = document.getElementById("questionInput") || document.getElementById("question");
+const aInput = document.getElementById("answerInput") || document.getElementById("answer");
+const addBtn = document.getElementById("addFlashcardBtn"); // optional; you might be using onclick on the button
 
-// Load flashcards from localStorage
-let flashcards = JSON.parse(localStorage.getItem("flashcards")) || [];
-let current = 0;
-let score = 0;
+const listEl = document.getElementById("flashcardList");
 
-// Save flashcards to localStorage
-function saveFlashcards() {
+const quizArea = document.getElementById("flashcardArea");
+const quizQuestionEl = document.getElementById("flashcardQuestion") || document.getElementById("flashcard");
+const userAnswerEl = document.getElementById("userAnswerInput");
+const feedbackEl = document.getElementById("feedback");
+
+// ========== Helpers ==========
+function save() {
   localStorage.setItem("flashcards", JSON.stringify(flashcards));
 }
 
-// Add new flashcard
+function show(el) {
+  if (!el) return;
+  el.style.display = "block";
+}
+
+function hide(el) {
+  if (!el) return;
+  el.style.display = "none";
+}
+
+// ========== CRUD ==========
 function addFlashcard() {
-  const q = document.getElementById("newQuestion").value.trim();
-  const a = document.getElementById("newAnswer").value.trim();
-
-  if (q && a) {
-    flashcards.push({ question: q, answer: a });
-    saveFlashcards();
-    updateFlashcardList();
-    document.getElementById("status").textContent = "✅ Flashcard added!";
-    document.getElementById("newQuestion").value = "";
-    document.getElementById("newAnswer").value = "";
-  } else {
-    document.getElementById("status").textContent = "❌ Please fill both fields.";
-  }
-}
-
-// Clear all flashcards
-function clearFlashcards() {
-  if (confirm("Are you sure you want to delete all flashcards?")) {
-    flashcards = [];
-    saveFlashcards();
-    updateFlashcardList();
-    document.getElementById("status").textContent = "🗑️ All flashcards cleared!";
-    document.getElementById("flashcardArea").style.display = "none";
-  }
-}
-
-// Display the list of flashcards
-function updateFlashcardList() {
-  const list = document.getElementById("flashcardList");
-  list.innerHTML = "";
-  flashcards.forEach((card, index) => {
-    const li = document.createElement("li");
-    li.textContent = `${card.question} → ${card.answer}`;
-    list.appendChild(li);
-  });
-}
-
-// Start the quiz
-function startQuiz() {
-  if (flashcards.length === 0) {
-    alert("Add some flashcards first!");
+  const q = (qInput?.value || "").trim();
+  const a = (aInput?.value || "").trim();
+  if (!q || !a) {
+    alert("Please enter both a question and an answer.");
     return;
   }
 
-  current = 0;
-  score = 0;
-  document.getElementById("flashcardArea").style.display = "block";
-  showQuestion();
+  flashcards.push({ question: q, answer: a });
+  save();
+
+  if (qInput) qInput.value = "";
+  if (aInput) aInput.value = "";
+
+  renderList();
+
+  // If we weren't already quizzing, start right away
+  if (quizArea && quizArea.style.display !== "block") {
+    startQuiz();
+  }
 }
 
-// Show current question
-function showQuestion() {
-  document.getElementById("question").textContent = flashcards[current].question;
-  document.getElementById("answer").value = "";
-  document.getElementById("feedback").textContent = "";
+function deleteFlashcard(index) {
+  flashcards.splice(index, 1);
+  save();
+  renderList();
+
+  // If you delete everything, exit quiz mode
+  if (flashcards.length === 0) {
+    hide(quizArea);
+    show(listEl);
+  }
 }
 
-// Check the answer
+function renderList() {
+  if (!listEl) return;
+  listEl.innerHTML = "";
+
+  flashcards.forEach((card, i) => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <span><strong>Q:</strong> ${card.question} &nbsp; | &nbsp; <strong>A:</strong> ${card.answer}</span>
+      <button class="delete-btn" type="button">Delete</button>
+    `;
+    li.querySelector("button").addEventListener("click", () => deleteFlashcard(i));
+    listEl.appendChild(li);
+  });
+}
+
+// ========== Quiz flow ==========
+function startQuiz() {
+  if (flashcards.length === 0) {
+    alert("No flashcards yet — add some first.");
+    return;
+  }
+  // Hide the saved list while quizzing
+  hide(listEl);
+  show(quizArea);
+  nextQuestion();
+}
+
+function nextQuestion() {
+  if (flashcards.length === 0) {
+    hide(quizArea);
+    show(listEl);
+    return;
+  }
+  currentCard = flashcards[Math.floor(Math.random() * flashcards.length)];
+  if (quizQuestionEl) quizQuestionEl.textContent = currentCard.question;
+  if (feedbackEl) feedbackEl.textContent = "";
+  if (userAnswerEl) userAnswerEl.value = "";
+  if (userAnswerEl) userAnswerEl.focus();
+}
+
 function checkAnswer() {
-  const userAnswer = document.getElementById("answer").value.trim();
+  if (!currentCard) return;
+  const userAns = (userAnswerEl?.value || "").trim().toLowerCase();
+  const correct = (currentCard.answer || "").trim().toLowerCase();
 
-  if (userAnswer.toLowerCase() === flashcards[current].answer.toLowerCase()) {
-    score++;
-    document.getElementById("feedback").textContent = "✅ Correct!";
-  } else {
-    document.getElementById("feedback").textContent = "❌ Wrong! The answer was " + flashcards[current].answer;
+  if (feedbackEl) {
+    if (userAns === correct) {
+      feedbackEl.textContent = "✅ Correct!";
+      feedbackEl.style.color = "lightgreen";
+    } else {
+      feedbackEl.textContent = `❌ Wrong! Correct answer: ${currentCard.answer}`;
+      feedbackEl.style.color = "red";
+    }
   }
 
-  current++;
-  if (current < flashcards.length) {
-    setTimeout(showQuestion, 1500);
-  } else {
-    setTimeout(() => {
-      document.getElementById("flashcardArea").innerHTML = `<h3>You scored ${score}/${flashcards.length}</h3>`;
-    }, 1500);
-  }
+  // After 2s, return to the list (as you requested)
+  setTimeout(() => {
+    show(listEl);
+    hide(quizArea);
+  }, 2000);
 }
 
-// Initialize list on page load
-updateFlashcardList();
+// ========== Wiring & Startup ==========
+function onEnter(el, handler) {
+  if (!el) return;
+  el.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") handler();
+  });
+}
+
+// If there's an explicit Add button without inline onclick, wire it:
+if (addBtn) addBtn.addEventListener("click", addFlashcard);
+
+// Enter to add from either field:
+onEnter(qInput, addFlashcard);
+onEnter(aInput, addFlashcard);
+
+// Enter to submit answer:
+onEnter(userAnswerEl, checkAnswer);
+
+// Initial render:
+renderList();
+
+// Auto-start quiz if there are already cards (since your app "goes straight into it")
+if (flashcards.length > 0 && quizArea) {
+  startQuiz();
+}
+
+// Expose functions if your HTML uses inline onclick=""
+window.addFlashcard = addFlashcard;
+window.checkAnswer = checkAnswer;
+window.startQuiz = startQuiz; // harmless if you don't have a Start button
