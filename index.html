@@ -15,10 +15,11 @@
     <button id="addFlashcardBtn">Add Flashcard</button>
     
     <ul id="flashcardList"></ul>
+    <button id="startQuizBtn">Start Quiz</button>
   </div>
 
   <!-- Flashcard Quiz -->
-  <div id="quiz">
+  <div id="quiz" style="display:none;">
     <div id="progress" style="margin: 10px 0;">Question 1 / 1 | Score: 0</div>
 
     <div id="flashcardArea">
@@ -27,6 +28,11 @@
       <button id="submitAnswerBtn">Submit Answer</button>
       <div id="feedback" style="margin-top:10px;"></div>
       <button id="nextBtn">Next</button>
+    </div>
+
+    <div id="quizEnd" style="display:none; margin-top:20px;">
+      <h2 id="finalScore"></h2>
+      <button id="backToCreatorBtn">Back to Creator</button>
     </div>
   </div>
 
@@ -39,6 +45,7 @@
     const answerInput = document.getElementById('answerInput');
     const addBtn = document.getElementById('addFlashcardBtn');
     const flashcardList = document.getElementById('flashcardList');
+    const startQuizBtn = document.getElementById('startQuizBtn');
 
     function renderList() {
       flashcardList.innerHTML = '';
@@ -67,19 +74,22 @@
       questionInput.value = '';
       answerInput.value = '';
       renderList();
-      shuffleFlashcards(); // reshuffle quiz if new flashcards added
-      displayFlashcard();
     });
 
     renderList();
 
     // ===== Quiz Section =====
+    const quizDiv = document.getElementById('quiz');
+    const creatorDiv = document.getElementById('creator');
     const flashcardDiv = document.getElementById('flashcard');
     const progressDiv = document.getElementById('progress');
     const userAnswerInput = document.getElementById('userAnswerInput');
     const submitAnswerBtn = document.getElementById('submitAnswerBtn');
     const nextBtn = document.getElementById('nextBtn');
     const feedbackDiv = document.getElementById('feedback');
+    const quizEndDiv = document.getElementById('quizEnd');
+    const finalScoreH2 = document.getElementById('finalScore');
+    const backToCreatorBtn = document.getElementById('backToCreatorBtn');
 
     let currentIndex = 0;
     let score = 0;
@@ -111,6 +121,7 @@
       userAnswerInput.style.display = 'inline-block';
       submitAnswerBtn.style.display = 'inline-block';
       nextBtn.style.display = 'inline-block';
+      quizEndDiv.style.display = 'none';
       updateProgress();
     }
 
@@ -129,17 +140,42 @@
     nextBtn.addEventListener('click', () => {
       currentIndex++;
       if (currentIndex >= flashcards.length) {
-        alert(`Quiz finished! Your score: ${score} / ${flashcards.length}`);
-        currentIndex = 0;
-        score = 0;
-        shuffleFlashcards();
+        endQuiz();
+      } else {
+        displayFlashcard();
       }
+    });
+
+    function endQuiz() {
+      flashcardDiv.textContent = '';
+      userAnswerInput.style.display = 'none';
+      submitAnswerBtn.style.display = 'none';
+      nextBtn.style.display = 'none';
+      progressDiv.textContent = '';
+      feedbackDiv.textContent = '';
+      finalScoreH2.textContent = `Quiz finished! Your score: ${score} / ${flashcards.length}`;
+      quizEndDiv.style.display = 'block';
+    }
+
+    startQuizBtn.addEventListener('click', () => {
+      if (flashcards.length === 0) {
+        alert("Add some flashcards first!");
+        return;
+      }
+      creatorDiv.style.display = 'none';
+      quizDiv.style.display = 'block';
+      currentIndex = 0;
+      score = 0;
+      shuffleFlashcards();
       displayFlashcard();
     });
 
-    // Initial setup
-    shuffleFlashcards();
-    displayFlashcard();
+    backToCreatorBtn.addEventListener('click', () => {
+      quizDiv.style.display = 'none';
+      creatorDiv.style.display = 'block';
+      score = 0;
+      currentIndex = 0;
+    });
   </script>
 </body>
 </html>
